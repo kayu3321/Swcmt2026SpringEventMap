@@ -1,0 +1,9 @@
+{
+  "name": "swcmt2026-spring-event-map",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Static map web app for the SWCMT 2026 Spring Event Firebase project",
+  "engines": {
+    "node": ">=22"
+  }
+}

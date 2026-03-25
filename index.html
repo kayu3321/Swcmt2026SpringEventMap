@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SWCMT 2026 Spring Event Map</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body class="page-map">
+    <main class="map-screen" aria-label="Event map screen">
+      <section class="map-viewport" aria-label="Draggable map viewport">
+        <div class="map-canvas">
+          <img
+            class="map-image"
+            src="map.png"
+            alt="SWCMT 2026 Spring Event map"
+          >
+          <div class="congestion-layer" aria-label="Congestion indicators"></div>
+        </div>
+      </section>
+
+      <div class="map-controls" aria-label="Map horizontal controls">
+        <button class="map-control-button" type="button" data-direction="left" aria-label="Move map left">&lt;&lt;</button>
+        <button class="map-control-button" type="button" data-direction="right" aria-label="Move map right">&gt;&gt;</button>
+      </div>
+
+      <nav class="category-menu" aria-label="Congestion category menu"></nav>
+    </main>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="map-data.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

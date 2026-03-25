@@ -1,0 +1,6 @@
+firebase-hosting.stdout.log
+firebase-hosting.stderr.log
+firebase-debug.log
+firestore-debug.log
+.firebase/
+node_modules/

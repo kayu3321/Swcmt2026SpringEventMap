@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SWCMT 2026 Spring Event Map Settings</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body class="page-settings">
+    <main class="settings-screen">
+      <header class="settings-header">
+        <p class="settings-eyebrow">MAP SETTINGS</p>
+        <h1>행사 항목 설정</h1>
+        <p class="settings-copy">항목 추가, 상태 변경, 좌표 수정은 이 페이지에서만 관리합니다.</p>
+      </header>
+
+      <section class="settings-panel settings-add-panel" aria-label="Add map item">
+        <h2>항목 추가</h2>
+        <form id="add-item-form" class="settings-form">
+          <label>
+            <span>항목명</span>
+            <input id="add-name" name="name" type="text" required>
+          </label>
+          <label>
+            <span>카테고리</span>
+            <select id="add-category" name="category"></select>
+          </label>
+          <label>
+            <span>상태</span>
+            <select id="add-status" name="status"></select>
+          </label>
+          <label>
+            <span>X 좌표</span>
+            <input id="add-x" name="x" type="number" min="0" max="1429" required>
+          </label>
+          <label>
+            <span>Y 좌표</span>
+            <input id="add-y" name="y" type="number" min="0" max="936" required>
+          </label>
+          <button class="settings-secondary-button settings-map-picker-button" type="button" data-picker-target="add-item-form">지도에서 선택</button>
+          <button class="settings-primary-button" type="submit">항목 추가</button>
+        </form>
+        <p id="settings-message" class="settings-message" aria-live="polite"></p>
+      </section>
+
+      <section class="settings-panel settings-list-panel" aria-label="Manage map items">
+        <div class="settings-list-header">
+          <h2>항목명 : 상태변경</h2>
+          <p>항목명을 누르면 좌표를 수정할 수 있습니다.</p>
+        </div>
+        <div id="settings-item-list" class="settings-item-list"></div>
+      </section>
+
+      <nav class="category-menu category-menu-settings" aria-label="Settings category menu"></nav>
+    </main>
+
+    <div id="map-picker-modal" class="map-picker-modal is-hidden" aria-hidden="true">
+      <div class="map-picker-backdrop" data-action="close-map-picker"></div>
+      <section class="map-picker-dialog" aria-label="Map coordinate picker">
+        <div class="map-picker-header">
+          <div>
+            <h2>지도에서 좌표 선택</h2>
+            <p>원하는 위치를 클릭하면 X/Y 좌표가 자동으로 입력됩니다.</p>
+          </div>
+          <button class="settings-secondary-button" type="button" data-action="close-map-picker">닫기</button>
+        </div>
+        <div class="map-picker-stage">
+          <img id="map-picker-image" class="map-picker-image" src="map.png" alt="Map coordinate picker">
+          <div id="map-picker-indicator" class="map-picker-indicator is-hidden" aria-hidden="true"></div>
+        </div>
+        <p id="map-picker-coords" class="map-picker-coords">아직 선택된 좌표가 없습니다.</p>
+      </section>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="map-data.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="settings.js"></script>
+  </body>
+</html>

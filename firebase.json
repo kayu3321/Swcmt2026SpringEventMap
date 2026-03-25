@@ -1,0 +1,39 @@
+{
+  "emulators": {
+    "firestore": {
+      "port": 8084
+    },
+    "hosting": {
+      "port": 5000
+    }
+  },
+  "firestore": {
+    "rules": "firestore.rules"
+  },
+  "hosting": [
+    {
+      "target": "map",
+      "public": ".",
+      "ignore": [
+        "firebase.json",
+        ".firebaserc",
+        "**/.*",
+        "**/node_modules/**"
+      ],
+      "rewrites": [
+        {
+          "source": "/settings",
+          "destination": "/settings.html"
+        },
+        {
+          "source": "/settings/**",
+          "destination": "/settings.html"
+        },
+        {
+          "source": "**",
+          "destination": "/index.html"
+        }
+      ]
+    }
+  ]
+}

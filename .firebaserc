@@ -1,0 +1,17 @@
+{
+  "projects": {
+    "default": "swcmt2026springevent-a8d8f",
+    "swcmt2026springevent-a8d8f": "swcmt2026springevent-a8d8f",
+    "prd": "swcmt2026springevent-a8d8f"
+  },
+  "targets": {
+    "swcmt2026springevent-a8d8f": {
+      "hosting": {
+        "map": [
+          "swcmt2026springeventmap"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}
