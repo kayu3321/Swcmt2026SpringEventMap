@@ -3,12 +3,13 @@
   const firebaseConfig = window.FIREBASE_CONFIG;
 
   const viewport = document.querySelector(".map-viewport");
+  const mapStage = document.querySelector(".map-stage");
   const mapImage = document.querySelector(".map-image");
   const congestionLayer = document.querySelector(".congestion-layer");
   const controlButtons = document.querySelectorAll(".map-control-button");
   const categoryMenu = document.querySelector(".category-menu");
 
-  if (!appConfig || !firebaseConfig || !viewport || !mapImage || !congestionLayer || !categoryMenu) {
+  if (!appConfig || !firebaseConfig || !viewport || !mapStage || !mapImage || !congestionLayer || !categoryMenu) {
     return;
   }
 
@@ -24,60 +25,25 @@
     activeCategory: appConfig.defaultCategory,
     isDragging: false,
     startX: 0,
+    startY: 0,
     startScrollLeft: 0,
-    items: []
-  };
-
-  const makeItemId = (category, name) =>
-    `${category}-${name}`
-      .toLowerCase()
-      .replace(/[^a-z0-9가-힣]+/g, "-")
-      .replace(/^-+|-+$/g, "");
-
-  const randomStatusKey = () => {
-    const options = appConfig.statuses;
-    return options[Math.floor(Math.random() * options.length)].key;
-  };
-
-  const buildSeedItems = () =>
-    appConfig.defaultItems.map((item, index) => ({
-      id: makeItemId(item.category, item.name),
-      name: item.name,
-      category: item.category,
-      status: randomStatusKey(),
-      x: item.x,
-      y: item.y,
-      sortOrder: index + 1
-    }));
-
-  const ensureSeedData = async () => {
-    const snapshot = await collectionRef.limit(1).get();
-    if (!snapshot.empty) {
-      return;
-    }
-
-    const batch = db.batch();
-    const now = firebase.firestore.FieldValue.serverTimestamp();
-
-    buildSeedItems().forEach((item) => {
-      batch.set(collectionRef.doc(item.id), {
-        name: item.name,
-        category: item.category,
-        status: item.status,
-        x: item.x,
-        y: item.y,
-        sortOrder: item.sortOrder,
-        createdAt: now,
-        updatedAt: now
-      });
-    });
-
-    await batch.commit();
+    items: [],
+    targetScrollLeft: 0,
+    currentVelocity: 0,
+    scrollEase: 0.22,
+    verticalOffset: 0,
+    verticalTargetOffset: 0,
+    lastPointerX: 0,
+    lastMoveTime: 0,
+    animationFrameId: 0
   };
 
   const statusLabelByKey = Object.fromEntries(
     appConfig.statuses.map((status) => [status.key, status.label])
   );
+
+  const clampScrollLeft = (value) =>
+    Math.max(0, Math.min(viewport.scrollWidth - viewport.clientWidth, value));
 
   const renderMenu = () => {
     categoryMenu.innerHTML = "";
@@ -113,14 +79,17 @@
     state.items
       .filter((item) => item.category === state.activeCategory)
       .forEach((item, index) => {
-        if (typeof item.x !== "number" || typeof item.y !== "number") {
+        const x = Number(item.x);
+        const y = Number(item.y);
+
+        if (Number.isNaN(x) || Number.isNaN(y)) {
           return;
         }
 
         const marker = document.createElement("div");
         marker.className = "congestion-marker";
-        marker.style.left = `${(item.x / appConfig.mapWidth) * 100}%`;
-        marker.style.top = `${((item.y + 34) / appConfig.mapHeight) * 100}%`;
+        marker.style.left = `${(x / appConfig.mapWidth) * 100}%`;
+        marker.style.top = `${((y + 34) / appConfig.mapHeight) * 100}%`;
         marker.style.zIndex = String(index + 1);
 
         const name = document.createElement("div");
@@ -140,38 +109,117 @@
 
   const centerMap = () => {
     const maxScrollLeft = viewport.scrollWidth - viewport.clientWidth;
-    viewport.scrollLeft = Math.max(0, maxScrollLeft / 2);
+    const centered = Math.max(0, maxScrollLeft / 2);
+
+    viewport.scrollLeft = centered;
+    state.targetScrollLeft = centered;
+  };
+
+  const stopAnimation = () => {
+    if (state.animationFrameId) {
+      cancelAnimationFrame(state.animationFrameId);
+      state.animationFrameId = 0;
+    }
+  };
+
+  const applyVerticalOffset = () => {
+    mapStage.style.transform = `translateY(${state.verticalOffset}px)`;
+  };
+
+  const animateScroll = () => {
+    stopAnimation();
+
+    const tick = () => {
+      const horizontalDiff = state.targetScrollLeft - viewport.scrollLeft;
+      const verticalDiff = state.verticalTargetOffset - state.verticalOffset;
+
+      if (
+        Math.abs(horizontalDiff) < 0.5 &&
+        Math.abs(state.currentVelocity) < 0.2 &&
+        Math.abs(verticalDiff) < 0.5
+      ) {
+        viewport.scrollLeft = clampScrollLeft(state.targetScrollLeft);
+        state.verticalOffset = state.verticalTargetOffset;
+        applyVerticalOffset();
+        state.currentVelocity = 0;
+        state.animationFrameId = 0;
+        return;
+      }
+
+      if (!state.isDragging) {
+        state.targetScrollLeft = clampScrollLeft(state.targetScrollLeft + state.currentVelocity);
+        state.currentVelocity *= 0.92;
+      }
+
+      viewport.scrollLeft += horizontalDiff * state.scrollEase;
+      state.verticalOffset += verticalDiff * 0.16;
+      applyVerticalOffset();
+
+      state.animationFrameId = requestAnimationFrame(tick);
+    };
+
+    state.animationFrameId = requestAnimationFrame(tick);
   };
 
   const moveByButton = (direction) => {
     const amount = Math.max(240, Math.round(viewport.clientWidth * 0.35));
     const delta = direction === "left" ? -amount : amount;
+    const baseScrollLeft = state.animationFrameId ? state.targetScrollLeft : viewport.scrollLeft;
 
-    viewport.scrollBy({
-      left: delta,
-      behavior: "smooth"
-    });
+    state.isDragging = false;
+    state.currentVelocity = 0;
+    state.scrollEase = 0.07;
+    state.targetScrollLeft = clampScrollLeft(baseScrollLeft + delta);
+    animateScroll();
   };
 
-  const startDrag = (clientX) => {
+  const startDrag = (clientX, clientY) => {
+    stopAnimation();
     state.isDragging = true;
     state.startX = clientX;
+    state.startY = clientY;
     state.startScrollLeft = viewport.scrollLeft;
+    state.targetScrollLeft = viewport.scrollLeft;
+    state.currentVelocity = 0;
+    state.scrollEase = 0.22;
+    state.lastPointerX = clientX;
+    state.lastMoveTime = performance.now();
     viewport.classList.add("is-dragging");
   };
 
-  const moveDrag = (clientX) => {
+  const moveDrag = (clientX, clientY) => {
     if (!state.isDragging) {
       return;
     }
 
     const deltaX = clientX - state.startX;
-    viewport.scrollLeft = state.startScrollLeft - deltaX;
+    const deltaY = clientY - state.startY;
+    const now = performance.now();
+    const timeDelta = Math.max(now - state.lastMoveTime, 1);
+    const pointerDelta = clientX - state.lastPointerX;
+
+    state.targetScrollLeft = clampScrollLeft(state.startScrollLeft - deltaX);
+    state.verticalTargetOffset = Math.max(-192, Math.min(192, deltaY * 0.66));
+    state.verticalOffset = state.verticalTargetOffset;
+    applyVerticalOffset();
+    state.currentVelocity = (-pointerDelta / timeDelta) * 18;
+    state.lastPointerX = clientX;
+    state.lastMoveTime = now;
+
+    if (!state.animationFrameId) {
+      animateScroll();
+    }
   };
 
   const endDrag = () => {
+    if (!state.isDragging) {
+      return;
+    }
+
     state.isDragging = false;
     viewport.classList.remove("is-dragging");
+    state.verticalTargetOffset = 0;
+    animateScroll();
   };
 
   const hydrateItems = (snapshot) => {
@@ -199,12 +247,12 @@
   window.addEventListener("resize", centerMap);
 
   viewport.addEventListener("pointerdown", (event) => {
-    startDrag(event.clientX);
+    startDrag(event.clientX, event.clientY);
     viewport.setPointerCapture(event.pointerId);
   });
 
   viewport.addEventListener("pointermove", (event) => {
-    moveDrag(event.clientX);
+    moveDrag(event.clientX, event.clientY);
   });
 
   viewport.addEventListener("pointerup", endDrag);
@@ -219,11 +267,9 @@
 
   renderMenu();
 
-  ensureSeedData()
-    .then(() => collectionRef.onSnapshot(hydrateItems))
-    .catch((error) => {
-      console.error("Failed to initialize map data", error);
-    });
+  collectionRef.onSnapshot(hydrateItems, (error) => {
+    console.error("Failed to subscribe map data", error);
+  });
 
   if (mapImage.complete) {
     centerMap();

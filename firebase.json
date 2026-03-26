@@ -1,5 +1,8 @@
 {
   "emulators": {
+    "auth": {
+      "port": 9099
+    },
     "firestore": {
       "port": 8084
     },
@@ -28,6 +31,14 @@
         {
           "source": "/settings/**",
           "destination": "/settings.html"
+        },
+        {
+          "source": "/status",
+          "destination": "/status.html"
+        },
+        {
+          "source": "/status/**",
+          "destination": "/status.html"
         },
         {
           "source": "**",

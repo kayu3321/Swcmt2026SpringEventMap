@@ -4,8 +4,8 @@ window.MAP_APP_CONFIG = {
   mapHeight: 936,
   defaultCategory: "experience",
   categories: [
-    { key: "experience", label: "체험", icon: "🎯" },
-    { key: "craft", label: "만들기", icon: "🛠" },
+    { key: "experience", label: "체험", icon: "🎡" },
+    { key: "craft", label: "만들기", icon: "✂" },
     { key: "performance", label: "공연", icon: "🎭" },
     { key: "dining", label: "식당", icon: "🍽" }
   ],

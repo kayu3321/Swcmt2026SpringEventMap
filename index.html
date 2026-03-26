@@ -2,20 +2,27 @@
 <html lang="ko">
   <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>SWCMT 2026 Spring Event Map</title>
     <link rel="stylesheet" href="styles.css">
   </head>
   <body class="page-map">
     <main class="map-screen" aria-label="Event map screen">
+      <header class="map-brand" aria-label="Map brand">
+        <p class="map-brand-eyebrow">SWCMT 2026 SPRING EVENT</p>
+        <h1 class="map-brand-title">사랑가득 봄나들이</h1>
+      </header>
+
       <section class="map-viewport" aria-label="Draggable map viewport">
         <div class="map-canvas">
-          <img
-            class="map-image"
-            src="map.png"
-            alt="SWCMT 2026 Spring Event map"
-          >
-          <div class="congestion-layer" aria-label="Congestion indicators"></div>
+          <div class="map-stage">
+            <img
+              class="map-image"
+              src="map.png"
+              alt="SWCMT 2026 Spring Event map"
+            >
+            <div class="congestion-layer" aria-label="Congestion indicators"></div>
+          </div>
         </div>
       </section>
 

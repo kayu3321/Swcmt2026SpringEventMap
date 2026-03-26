@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>혼잡도 설정</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body class="page-status-control">
+    <main class="status-control-screen">
+      <section class="status-control-card">
+        <p class="status-control-eyebrow">STATUS CONTROL</p>
+        <h1 id="status-heading" class="status-control-title">항목을 불러오는 중입니다.</h1>
+        <p id="status-control-message" class="status-control-message" aria-live="polite"></p>
+      </section>
+
+      <section class="status-picker-panel" aria-label="Congestion picker">
+        <button class="status-option-button status-option-smooth" type="button" data-status="smooth">
+          <span class="status-option-icon" aria-hidden="true">○</span>
+          <span class="status-option-label">원활</span>
+        </button>
+        <button class="status-option-button status-option-normal" type="button" data-status="normal">
+          <span class="status-option-icon" aria-hidden="true">◐</span>
+          <span class="status-option-label">보통</span>
+        </button>
+        <button class="status-option-button status-option-busy" type="button" data-status="busy">
+          <span class="status-option-icon" aria-hidden="true">●</span>
+          <span class="status-option-label">혼잡</span>
+        </button>
+      </section>
+    </main>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="map-data.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="status-control.js"></script>
+  </body>
+</html>
